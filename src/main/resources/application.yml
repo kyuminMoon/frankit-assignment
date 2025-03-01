@@ -1,4 +1,107 @@
 spring.application.name: frankit-assignment
+# 서버 설정
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+  error:
+    include-stacktrace: always
+    include-message: always
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/plain
+    min-response-size: 1024
+
+spring:
+
+  # 프로필 설정
+  profiles:
+    active: local
+
+  # Jackson 설정
+  jackson:
+    default-property-inclusion: non_null
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Seoul
+    serialization:
+      write-dates-as-timestamps: false
+      fail-on-empty-beans: false
+
+  # 서블릿 설정
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  # 캐시 설정
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000  # 1시간
+      cache-null-values: false
+
+  # JPA 공통 설정
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100
+
+  # Thymeleaf 설정
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    check-template-location: true
+
+  # JWT 설정
+  jwt:
+    secret-key: ${JWT_SECRET:secret-key-1234567890-1234567890-1234567890-1234567890}
+    access-token-expiration: 3600000  # 1시간
+    refresh-token-expiration: 86400000  # 24시간
+
+  # 애플리케이션 사용자 정의 설정
+  app:
+    admin:
+      emails: admin@example.com
+
+    # 분산 락 설정
+    distributed-lock:
+      default-wait-time: 5000  # 5초
+      default-lease-time: 10000  # 10초
+
+    # 성능 로깅 설정
+    performance:
+      logging:
+        enabled: true
+        slow-execution-threshold: 1000  # 1초 이상 걸리는 요청 로깅
+
+  # Actuator 설정
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: health,info,metrics,prometheus
+    endpoint:
+      health:
+        show-details: when-authorized
+    info:
+      git:
+        mode: full
+
+# 로그 설정
+logging:
+  level:
+    root: INFO
+    com.tistory.kmmoon: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.cache: DEBUG
+    org.springframework.transaction: DEBUG
+    org.springframework.jdbc: DEBUG # 로컬 환경 특화 설정
 
 springdoc:
   swagger-ui:

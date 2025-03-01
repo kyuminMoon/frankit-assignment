@@ -59,6 +59,10 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.projectlombok:lombok'
 
+    // logback
+    implementation 'ch.qos.logback:logback-classic:1.5.17'
+    implementation 'ch.qos.logback:logback-core:1.5.17'
+
     // 테스트 관련
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
@@ -83,8 +87,15 @@ dependencies {
     // Mockito
     testImplementation 'org.mockito:mockito-core'
     testImplementation 'org.mockito:mockito-junit-jupiter'
+
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+    jvmArgs = [
+            "-javaagent:${configurations.testRuntimeClasspath.find { it.name.contains('byte-buddy-agent') }.absolutePath}"
+    ]
+
+    systemProperty 'jdk.instrument.traceUsage', 'false'
+    jvmArgs += '-XX:+EnableDynamicAgentLoading'
 }
