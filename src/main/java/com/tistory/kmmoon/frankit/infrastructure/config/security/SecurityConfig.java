@@ -3,6 +3,7 @@ package com.tistory.kmmoon.frankit.infrastructure.config.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -36,10 +37,23 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/css/**", "/js/**", "/images/**").permitAll()
-                        .requestMatchers("/api/docs/**", "/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/", "/home", "/login", "/register", "/auth/**", "/error/**", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/api-docs/**", "/api-docs/json", "/api/docs/**", "/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**").permitAll()
+
+                        // 인증 관련 API는 인증 없이 접근 가능
+                        .requestMatchers("/error","/auth/login", "/auth/refresh").permitAll()
+                        .requestMatchers("/auth/logout").authenticated()
+
+                        // View 페이지 접근 권한 설정
+                        .requestMatchers(HttpMethod.GET, "/view/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
+                )
+                .formLogin(login -> login
+                        .loginPage("/login") // 로그인 페이지 설정
+                        .permitAll()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .build();

@@ -3,7 +3,9 @@ package com.tistory.kmmoon.frankit.application.service;
 import com.tistory.kmmoon.frankit.common.annotation.ReadOnlyTransactional;
 import com.tistory.kmmoon.frankit.domain.entity.User;
 import com.tistory.kmmoon.frankit.domain.exception.CustomExceptions;
+import com.tistory.kmmoon.frankit.domain.exception.ErrorCode;
 import com.tistory.kmmoon.frankit.domain.repository.UserRepository;
+import com.tistory.kmmoon.frankit.presentation.dto.request.ModifyUserRequest;
 import com.tistory.kmmoon.frankit.presentation.dto.request.UserRequest;
 import com.tistory.kmmoon.frankit.presentation.dto.response.UserResponse;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +48,32 @@ public class UserService {
         User savedUser = userRepository.save(user);
         log.info("사용자 가입 완료: id={}", savedUser.getId());
         
+        return UserResponse.fromEntity(savedUser);
+    }
+
+    /**
+     * 관리자 가입
+     */
+    @Transactional
+    public UserResponse registerAdmin(UserRequest request) {
+        log.info("관리자 가입 요청: {}", request.getEmail());
+
+        // 이메일 중복 검사
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("이미 등록된 이메일입니다.");
+        }
+
+        // 사용자 엔티티 생성
+        User user = User.builder()
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .name(request.getName())
+                .role(User.Role.ADMIN) // 기본 역할은 USER
+                .build();
+
+        User savedUser = userRepository.save(user);
+        log.info("사용자 가입 완료: id={}", savedUser.getId());
+
         return UserResponse.fromEntity(savedUser);
     }
     
@@ -96,7 +124,7 @@ public class UserService {
         
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomExceptions.ResourceNotFoundException("사용자를 찾을 수 없습니다. id: " + userId));
-        
+
         // 이름 수정
         if (request.getName() != null) {
             user.setName(request.getName());
@@ -112,6 +140,37 @@ public class UserService {
         
         return UserResponse.fromEntity(updatedUser);
     }
+
+
+    /**
+     * 사용자 정보 수정
+     */
+    @Transactional
+    public UserResponse updateUser(Long userId, ModifyUserRequest request) {
+        log.info("사용자 정보 수정 요청: id={}", userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomExceptions.ResourceNotFoundException("사용자를 찾을 수 없습니다. id: " + userId));
+
+        // 이름 수정
+        if (request.getName() != null) {
+            user.setName(request.getName());
+        }
+
+        // 비밀번호 수정
+        if(!request.getPassword().isEmpty()){
+            if (passwordEncoder.matches(request.getBeforePassword(), user.getPassword()) && request.getPassword() != null) {
+                user.setPassword(passwordEncoder.encode(request.getPassword()));
+            } else {
+                throw new CustomExceptions.CustomException(ErrorCode.INPUT_VALUE_ERROR);
+            }
+        }
+
+        User updatedUser = userRepository.save(user);
+        log.info("사용자 정보 수정 완료: id={}", updatedUser.getId());
+
+        return UserResponse.fromEntity(updatedUser);
+    }
     
     /**
      * 사용자 삭제
@@ -125,5 +184,23 @@ public class UserService {
         
         userRepository.delete(user);
         log.info("사용자 삭제 완료: id={}", userId);
+    }
+
+
+    /**
+     * USER > ADMIN Role 추가
+     */
+    @Transactional
+    public UserResponse updateUserRole(Long userId, User.Role newRole) {
+        log.info("사용자 Role 추가: id={}, newRole={}", userId, newRole);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomExceptions.ResourceNotFoundException("사용자를 찾을 수 없습니다. id: " + userId));
+
+        user.setRole(newRole);
+        User updatedUser = userRepository.save(user);
+        log.info("사용자 역할 변경 완료: id={}, role={}", updatedUser.getId(), updatedUser.getRole());
+
+        return UserResponse.fromEntity(updatedUser);
     }
 }

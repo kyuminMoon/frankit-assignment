@@ -1,5 +1,6 @@
-package com.tistory.kmmoon.frankit.domain.exception;
+package com.tistory.kmmoon.frankit.presentation.advice;
 
+import com.tistory.kmmoon.frankit.domain.exception.CustomExceptions;
 import com.tistory.kmmoon.frankit.infrastructure.logging.ApplicationLogger;
 import com.tistory.kmmoon.frankit.presentation.dto.response.ErrorResponse;
 import lombok.RequiredArgsConstructor;
@@ -52,6 +53,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CustomExceptions.AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthenticationException(CustomExceptions.AuthenticationException e) {
         log.error("인증 오류: {}", e.getMessage());
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .message(e.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+
+
+    @ExceptionHandler(CustomExceptions.AuthorizationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthorizationException(CustomExceptions.AuthorizationException e) {
+        log.error("권한 오류: {}", e.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.UNAUTHORIZED.value())
