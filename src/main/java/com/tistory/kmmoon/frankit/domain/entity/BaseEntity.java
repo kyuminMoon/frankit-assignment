@@ -22,11 +22,11 @@ import java.time.LocalDateTime;
 public abstract class BaseEntity {
 
     /**
-     * 생성자 (이메일)
+     * 생성자 (UserId)
      */
     @CreatedBy
     @Column(name = "created_by", nullable = false, updatable = false, length = 200)
-    private String createdBy;
+    private Long createdBy;
 
     /**
      * 생성일시
@@ -36,11 +36,11 @@ public abstract class BaseEntity {
     private LocalDateTime createdAt;
 
     /**
-     * 최종 수정자 (이메일)
+     * 최종 수정자 (UserId)
      */
     @LastModifiedBy
     @Column(name = "last_modified_by", length = 200)
-    private String lastModifiedBy;
+    private Long lastModifiedBy;
 
     /**
      * 최종 수정일시

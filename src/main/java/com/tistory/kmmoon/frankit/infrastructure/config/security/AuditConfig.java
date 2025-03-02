@@ -1,5 +1,6 @@
 package com.tistory.kmmoon.frankit.infrastructure.config.security;
 
+import com.tistory.kmmoon.frankit.domain.entity.User;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
@@ -23,23 +24,21 @@ public class AuditConfig {
      * - Spring Security의 인증 정보에서 현재 사용자 이메일을 추출
      */
     @Bean
-    public AuditorAware<String> auditorProvider() {
+    public AuditorAware<Long> auditorProvider() {
         return () -> {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            
+
             if (authentication == null || !authentication.isAuthenticated()) {
-                return Optional.of("system");
+                return Optional.empty();
             }
-            
+
             Object principal = authentication.getPrincipal();
-            
-            if (principal instanceof UserDetails userDetails) {
-                return Optional.of(userDetails.getUsername());
-            } else if (principal instanceof String) {
-                return Optional.of(principal.toString());
+
+            if (principal instanceof User userDetails) {
+                return Optional.of(userDetails.getId());
             }
-            
-            return Optional.of("unknown");
+
+            return Optional.empty();
         };
     }
 }
