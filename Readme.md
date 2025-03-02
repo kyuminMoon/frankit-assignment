@@ -159,6 +159,7 @@ com.tistory.kmmoon.frankit
 
 local, dev, prod로 profile을 나눠 local, dev는 디버깅 시 편하게 디버깅 가능하도록, prod의 경우 로그가 너무 많이 쌓이지 않게 조정하여 WARN, ERROR 레벨의 에러를 traceid와 request 값을 함께 로그에 추가하여 에러가 발생 시, 로그를 보고 찾아갈수 있도록 조치합니다.
 현업이라면 ELK의 ElasticAPM + Kibana, Datadog, Grafana 등을 사용해 모니터링 하겠지만 해당 부분은 시간상 구현이 불가능해 제외하였습니다.
+Actuator나 Spring Boot Admin를 사용하여 실행중인 로그 레벨을 바꾸는 것도 가능하므로 로깅 레벨을 적절히 바꿔 로깅하는것도 고려할 수 있습니다.
 
 ### 4.1 profile 별 검토 사항
 profile이 dev, prod 환경이라면 에러 로그를 logback을 사용해 slack과 같은 메신저로 웹훅을 통해 알람을 보내겠지만, 해당 부분은 검토하지 않았습니다.

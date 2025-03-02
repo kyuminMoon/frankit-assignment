@@ -78,6 +78,13 @@ spring:
         enabled: true
         slow-execution-threshold: 1000  # 1초 이상 걸리는 요청 로깅
 
+  # 기본 페이징 설정
+  data:
+    web:
+      pageable:
+        default-page-size: 10   # 기본 페이지 크기
+        max-page-size: 100      # 최대 페이지 크기
+
   # Actuator 설정
   management:
     endpoints:
@@ -91,22 +98,10 @@ spring:
       git:
         mode: full
 
-# 로그 설정
-logging:
-  level:
-    root: INFO
-    com.tistory.kmmoon: DEBUG
-    org.springframework.web: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    org.springframework.cache: DEBUG
-    org.springframework.transaction: DEBUG
-    org.springframework.jdbc: DEBUG # 로컬 환경 특화 설정
-
 springdoc:
   swagger-ui:
     enabled: true
-    path: /api-docs
+    path: /swagger-ui/swagger-ui.html
     tags-sorter: alpha
     operations-sorter: alpha
     display-request-duration: true
@@ -117,5 +112,5 @@ springdoc:
   cache.disabled: true
   default-consumes-media-type: application/json;charset=UTF-8
   default-produces-media-type: application/json;charset=UTF-8
-  packages-to-scan: com.tistory.kmmoon.controller
+  packages-to-scan: com.tistory.kmmoon
   show-login-endpoint: true
