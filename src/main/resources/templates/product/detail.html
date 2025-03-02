@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/default}">
+<head>
+    <title>상품 상세</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between mb-3">
+            <h2>상품 상세</h2>
+            <div>
+                <a th:href="@{/view/products}" class="btn btn-secondary">목록으로</a>
+                <a th:href="@{/view/products/{id}/edit(id=${product.id})}" class="btn btn-warning">수정</a>
+                <button type="button" class="btn btn-danger" th:onclick="'deleteProduct(' + ${product.id} + ')'">삭제</button>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">기본 정보</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-2">
+                    <div class="col-md-3 fw-bold">상품 ID</div>
+                    <div class="col-md-9" th:text="${product.id}">1</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-3 fw-bold">상품명</div>
+                    <div class="col-md-9" th:text="${product.name}">상품명</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-3 fw-bold">가격</div>
+                    <div class="col-md-9" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '원'">10,000원</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-3 fw-bold">배송비</div>
+                    <div class="col-md-9" th:text="${#numbers.formatDecimal(product.shippingFee, 0, 'COMMA', 0, 'POINT')} + '원'">2,500원</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-3 fw-bold">재고</div>
+                    <div class="col-md-9" th:text="${product.stock}">100</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-3 fw-bold">등록일</div>
+                    <div class="col-md-9" th:text="${#temporals.format(product.createdAt, 'yyyy-MM-dd HH:mm')}">2023-01-01 12:00</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-3 fw-bold">수정일</div>
+                    <div class="col-md-9" th:text="${#temporals.format(product.updatedAt, 'yyyy-MM-dd HH:mm')}">2023-01-01 12:00</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">상품 설명</h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${product.description}" th:utext="${#strings.replace(#strings.escapeXml(product.description), '&#10;', '<br/>')}">
+                    상품 설명 내용입니다.
+                </div>
+                <div th:unless="${product.description}" class="text-muted">
+                    상품 설명이 없습니다.
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4" th:if="${!#lists.isEmpty(product.options)}">
+            <div class="card-header">
+                <h5 class="mb-0">상품 옵션</h5>
+            </div>
+            <div class="card-body">
+                <div th:each="option, optionStat : ${product.options}" class="mb-3">
+                    <h6 th:text="${option.name}">옵션명</h6>
+
+                    <!-- 추가 가격 표시 -->
+                    <div th:if="${option.additionalPrice != null && option.additionalPrice > 0}" class="text-muted mb-2">
+                        추가 가격: <span th:text="${#numbers.formatDecimal(option.additionalPrice, 0, 'COMMA', 0, 'POINT')} + '원'">+1,000원</span>
+                    </div>
+
+                    <div th:if="${option.optionType.name() == 'INPUT'}" class="text-muted">
+                        텍스트 입력 옵션
+                    </div>
+
+                    <div th:if="${option.optionType.name() == 'SELECT' && !#lists.isEmpty(option.optionValues)}" class="mt-2">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item" th:each="value : ${option.optionValues}">
+                                <div class="d-flex justify-content-between">
+                                    <span th:text="${value.value}">옵션값</span>
+                                    <span th:if="${option.additionalPrice != null && option.additionalPrice > 0}"
+                                          th:text="'+' + ${#numbers.formatDecimal(option.additionalPrice, 0, 'COMMA', 0, 'POINT')} + '원'">+1,000원</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div th:if="${option.optionType.name() == 'SELECT' && #lists.isEmpty(option.optionValues)}" class="text-muted mt-2">
+                        설정된 옵션값이 없습니다.
+                    </div>
+                    <hr th:if="${!optionStat.last}">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 삭제 기능 스크립트 -->
+    <script th:inline="javascript">
+        function deleteProduct(productId) {
+            if (confirm('정말 이 상품을 삭제하시겠습니까?')) {
+                fetch(`/api/products/${productId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        alert('상품이 삭제되었습니다.');
+                        window.location.href = '/api/view/products';
+                    } else {
+                        response.json().then(data => {
+                            alert('삭제 실패: ' + (data.message || '알 수 없는 오류가 발생했습니다.'));
+                        }).catch(error => {
+                            alert('삭제 실패: 알 수 없는 오류가 발생했습니다.');
+                        });
+                    }
+                }).catch(error => {
+                    alert('네트워크 오류가 발생했습니다.');
+                });
+            }
+        }
+    </script>
+</div>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/default}">
+<head>
+    <title>사용자 등록</title>
+    <style>
+        .password-strength {
+            height: 5px;
+            margin-top: 5px;
+            transition: all 0.3s ease;
+        }
+        .password-strength-weak {
+            width: 30%;
+            background-color: #dc3545;
+        }
+        .password-strength-medium {
+            width: 60%;
+            background-color: #ffc107;
+        }
+        .password-strength-strong {
+            width: 100%;
+            background-color: #198754;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between mb-3">
+            <h2>사용자 등록</h2>
+            <a th:href="@{/view/users}" class="btn btn-secondary">목록으로</a>
+        </div>
+
+        <!-- 오류 메시지 -->
+        <div class="alert alert-danger d-none" id="errorMessage" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span id="errorText">사용자 등록에 실패했습니다.</span>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">사용자 정보 입력</h5>
+            </div>
+            <div class="card-body">
+                <form id="userForm" class="needs-validation" novalidate>
+                    <div class="mb-3 row">
+                        <label for="email" class="col-sm-2 col-form-label">이메일 <span class="text-danger">*</span></label>
+                        <div class="col-sm-10">
+                            <input type="email" class="form-control" id="email" name="email" required>
+                            <div class="invalid-feedback">
+                                유효한 이메일 주소를 입력해주세요.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="name" class="col-sm-2 col-form-label">이름 <span class="text-danger">*</span></label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="name" name="name" required>
+                            <div class="invalid-feedback">
+                                이름을 입력해주세요.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="password" class="col-sm-2 col-form-label">비밀번호 <span class="text-danger">*</span></label>
+                        <div class="col-sm-10">
+                            <input type="password" class="form-control" id="password" name="password" required minlength="8">
+                            <div class="password-strength d-none" id="passwordStrength"></div>
+                            <div class="invalid-feedback">
+                                비밀번호는 최소 8자리 이상이어야 합니다.
+                            </div>
+                            <small class="text-muted">비밀번호는 최소 8자리 이상, 특수문자와 숫자를 포함해야 합니다.</small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="confirmPassword" class="col-sm-2 col-form-label">비밀번호 확인 <span class="text-danger">*</span></label>
+                        <div class="col-sm-10">
+                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                            <div class="invalid-feedback">
+                                비밀번호가 일치하지 않습니다.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="role" class="col-sm-2 col-form-label">역할 <span class="text-danger">*</span></label>
+                        <div class="col-sm-10">
+                            <select class="form-select" id="role" name="role" required>
+                                <option value="" selected disabled>역할 선택</option>
+                                <option value="USER">일반 사용자</option>
+                                <option value="ADMIN">관리자</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                역할을 선택해주세요.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="button" class="btn btn-secondary me-md-2" onclick="location.href='/api/view/users'">취소</button>
+                        <button type="submit" class="btn btn-primary">등록</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            const userForm = document.getElementById('userForm');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const passwordStrength = document.getElementById('passwordStrength');
+
+            // 비밀번호 강도 측정
+            passwordInput.addEventListener('input', function() {
+                const password = this.value;
+                const hasNumber = /\d/.test(password);
+                const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+                const isLongEnough = password.length >= 8;
+
+                passwordStrength.className = 'password-strength';
+
+                if (password.length === 0) {
+                    passwordStrength.classList.add('d-none');
+                } else {
+                    passwordStrength.classList.remove('d-none');
+
+                    if (isLongEnough && hasNumber && hasSpecial) {
+                        passwordStrength.classList.add('password-strength-strong');
+                    } else if (isLongEnough && (hasNumber || hasSpecial)) {
+                        passwordStrength.classList.add('password-strength-medium');
+                    } else {
+                        passwordStrength.classList.add('password-strength-weak');
+                    }
+                }
+            });
+
+            // 비밀번호 확인 일치 검사
+            confirmPasswordInput.addEventListener('input', function() {
+                if (this.value !== passwordInput.value) {
+                    confirmPasswordInput.setCustomValidity('비밀번호가 일치하지 않습니다.');
+                } else {
+                    confirmPasswordInput.setCustomValidity('');
+                }
+            });
+
+            // 폼 제출 이벤트
+            userForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // 폼 유효성 검사
+                if (!userForm.checkValidity()) {
+                    e.stopPropagation();
+                    userForm.classList.add('was-validated');
+                    return;
+                }
+
+                // 오류 메시지 초기화
+                errorMessage.classList.add('d-none');
+
+                // 사용자 데이터 준비
+                const userData = {
+                    email: document.getElementById('email').value,
+                    name: document.getElementById('name').value,
+                    password: passwordInput.value,
+                    role: document.getElementById('role').value
+                };
+
+                // API 호출
+                fetch(role === 'admin' ? '/api/admin/users' : '/api/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+                    },
+                    body: JSON.stringify(userData)
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        return response.json().then(data => {
+                            throw new Error(data.message || '사용자 등록에 실패했습니다.');
+                        });
+                    }
+                })
+                .then(data => {
+                    alert('사용자가 등록되었습니다.');
+                    window.location.href = `/api/view/users/${data.id}`;
+                })
+                .catch(error => {
+                    errorText.textContent = error.message;
+                    errorMessage.classList.remove('d-none');
+                    window.scrollTo(0, 0);
+                });
+            });
+        });
+    </script>
+</div>
+</body>
+</html>

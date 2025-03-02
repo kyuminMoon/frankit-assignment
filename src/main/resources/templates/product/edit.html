@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/default}">
+<head>
+    <title>상품 수정</title>
+    <style>
+        .option-values-container {
+            border-left: 3px solid #dee2e6;
+            padding-left: 15px;
+            margin-top: 10px;
+        }
+        .option-value-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            position: relative;
+        }
+        .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between mb-3">
+            <h2>상품 수정</h2>
+            <div>
+                <a th:href="@{/view/products}" class="btn btn-secondary me-2">목록으로</a>
+                <a th:href="@{/view/products/{id}(id=${product.id})}" class="btn btn-info">상세로</a>
+            </div>
+        </div>
+
+        <form id="productForm" class="needs-validation" novalidate th:data-product-id="${product.id}">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">기본 정보</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3 row">
+                        <label for="name" class="col-sm-2 col-form-label">상품명 <span class="text-danger">*</span></label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="name" name="name" required th:value="${product.name}">
+                            <div class="invalid-feedback">상품명은 필수 입력 항목입니다.</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="price" class="col-sm-2 col-form-label">가격 <span class="text-danger">*</span></label>
+                        <div class="col-sm-10">
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="price" name="price" required min="0" th:value="${product.price}">
+                                <span class="input-group-text">원</span>
+                                <div class="invalid-feedback">가격은 필수 입력 항목이며 양수여야 합니다.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="shippingFee" class="col-sm-2 col-form-label">배송비 <span class="text-danger">*</span></label>
+                        <div class="col-sm-10">
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="shippingFee" name="shippingFee" required min="0" th:value="${product.shippingFee}">
+                                <span class="input-group-text">원</span>
+                                <div class="invalid-feedback">배송비는 필수 입력 항목이며 양수여야 합니다.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="stock" class="col-sm-2 col-form-label">상품 재고</label>
+                        <div class="col-sm-10">
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="stock" name="stock" required min="0" th:value="${product.stock}">
+                                <span class="input-group-text">개</span>
+                                <div class="invalid-feedback">재고는 필수 입력 항목이며 양수여야 합니다.</div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="description" class="col-sm-2 col-form-label">상품 설명</label>
+                        <div class="col-sm-10">
+                            <textarea class="form-control" id="description" name="description" rows="5" th:text="${product.description}"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 상품 옵션 -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">상품 옵션</h5>
+                    <button type="button" class="btn btn-sm btn-primary" id="addOptionBtn">옵션 추가</button>
+                </div>
+                <div class="card-body">
+                    <div id="optionsContainer">
+                        <!-- 옵션이 여기에 동적으로 추가됩니다 -->
+                        <div class="text-center text-muted p-3" id="noOptionsMessage">
+                            추가된 옵션이 없습니다. '옵션 추가' 버튼을 클릭하여 옵션을 추가하세요.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
+                <button type="button" class="btn btn-secondary me-md-2" th:onclick="'location.href=\'/api/view/products/' + ${product.id} + '\''">취소</button>
+                <button type="button" class="btn btn-primary" id="submitBtn">저장</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 옵션 템플릿 -->
+    <template id="optionTemplate">
+        <div class="option-item mb-4 p-3 border rounded">
+            <div class="mb-3 row">
+                <label class="col-sm-2 col-form-label">옵션명 <span class="text-danger">*</span></label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control option-name" required>
+                    <div class="invalid-feedback">옵션명은 필수 입력 항목입니다.</div>
+                </div>
+            </div>
+            <div class="mb-3 row">
+                <label class="col-sm-2 col-form-label">옵션 타입 <span class="text-danger">*</span></label>
+                <div class="col-sm-10">
+                    <select class="form-select option-type" required>
+                        <option value="">옵션 타입 선택</option>
+                        <option value="INPUT">텍스트 입력</option>
+                        <option value="SELECT">선택형</option>
+                    </select>
+                    <div class="invalid-feedback">옵션 타입은 필수 선택 항목입니다.</div>
+                </div>
+            </div>
+            <div class="mb-3 row">
+                <label class="col-sm-2 col-form-label">추가 가격</label>
+                <div class="col-sm-10">
+                    <div class="input-group">
+                        <input type="number" class="form-control option-additional-price" value="0" min="0">
+                        <span class="input-group-text">원</span>
+                    </div>
+                </div>
+            </div>
+            <div class="option-values-section d-none">
+                <hr>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6>옵션값 목록</h6>
+                    <button type="button" class="btn btn-sm btn-outline-primary add-option-value-btn">옵션값 추가</button>
+                </div>
+                <div class="option-values-container">
+                    <!-- 옵션값이 여기에 동적으로 추가됩니다 -->
+                    <div class="text-center text-muted p-2 no-values-message">
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn-close float-end remove-option-btn" aria-label="Close"></button>
+        </div>
+    </template>
+
+    <!-- 옵션값 템플릿 -->
+    <template id="optionValueTemplate">
+        <div class="option-value-item">
+            <button type="button" class="btn-close btn-sm remove-btn" aria-label="Close"></button>
+            <div class="row mb-2">
+                <div class="col-12">
+                    <label class="form-label">옵션값 <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control form-control-sm option-value-value" required>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            const optionsContainer = document.getElementById('optionsContainer');
+            const addOptionBtn = document.getElementById('addOptionBtn');
+            const submitBtn = document.getElementById('submitBtn');
+            const noOptionsMessage = document.getElementById('noOptionsMessage');
+            const optionTemplate = document.getElementById('optionTemplate');
+            const optionValueTemplate = document.getElementById('optionValueTemplate');
+            let optionCount = 0;
+
+            // 상품 데이터
+            const productId = document.getElementById('productForm').getAttribute('data-product-id');
+            const productOptions = /*[[${product.options}]]*/ [];
+
+            // 기존 옵션 로드
+            if (productOptions && productOptions.length > 0) {
+                productOptions.forEach(option => {
+                    addOption(option);
+                });
+            } else {
+                updateNoOptionsMessage();
+            }
+
+            // 옵션 추가 버튼 이벤트
+            addOptionBtn.addEventListener('click', function() {
+                if (optionCount >= 3) {
+                    alert('옵션은 최대 3개까지만 추가할 수 있습니다.');
+                    return;
+                }
+
+                addOption();
+            });
+
+            // 폼 제출 버튼 이벤트
+            submitBtn.addEventListener('click', function() {
+                if (validateForm()) {
+                    submitForm();
+                }
+            });
+
+            // 옵션 추가 함수
+            function addOption(optionData = null) {
+                noOptionsMessage.style.display ='none';
+                const optionClone = document.importNode(optionTemplate.content, true);
+                const optionItem = optionClone.querySelector('.option-item');
+
+                // 삭제 버튼 이벤트
+                optionClone.querySelector('.remove-option-btn').addEventListener('click', function() {
+                    optionItem.remove();
+                    optionCount--;
+                    updateNoOptionsMessage();
+                });
+
+                // 옵션 타입 변경 이벤트
+                const optionTypeSelect = optionClone.querySelector('.option-type');
+                const optionValuesSection = optionClone.querySelector('.option-values-section');
+
+                optionTypeSelect.addEventListener('change', function() {
+                    if (this.value === 'SELECT') {
+                        optionValuesSection.classList.remove('d-none');
+                    } else {
+                        optionValuesSection.classList.add('d-none');
+                    }
+                });
+
+                // 옵션값 추가 버튼 이벤트
+                optionClone.querySelector('.add-option-value-btn').addEventListener('click', function() {
+                    const currentOptionValues = optionItem.querySelectorAll('.option-value-item').length;
+
+                    if (currentOptionValues >= 10) {
+                        alert('옵션값은 최대 10개까지만 추가할 수 있습니다.');
+                        return;
+                    }
+                    addOptionValue(optionItem);
+                });
+
+                // 기존 옵션 데이터가 있으면 설정
+                if (optionData) {
+                    optionClone.querySelector('.option-name').value = optionData.name;
+                    optionTypeSelect.value = optionData.optionType;
+
+                    // 추가 가격 설정 (있다면)
+                    if (optionData.additionalPrice !== undefined) {
+                        optionClone.querySelector('.option-additional-price').value = optionData.additionalPrice;
+                    }
+
+                    // 선택형 옵션인 경우 옵션값 설정
+                    if (optionData.optionType === 'SELECT') {
+                        optionValuesSection.classList.remove('d-none');
+
+                        if (optionData.optionValues && optionData.optionValues.length > 0) {
+                            optionItem.querySelector('.no-values-message').classList.add('d-none');
+
+                            optionData.optionValues.forEach(valueData => {
+                                addOptionValue(optionItem, valueData);
+                            });
+                        }
+                    }
+                }
+
+                optionsContainer.appendChild(optionClone);
+                optionCount++;
+                updateNoOptionsMessage();
+            }
+
+            // 옵션값 추가 함수
+            function addOptionValue(optionItem, valueData = null) {
+                const optionValuesContainer = optionItem.querySelector('.option-values-container');
+                const noValuesMessage = optionItem.querySelector('.no-values-message');
+
+                // 현재 옵션에 있는 옵션값 개수 확인
+                const currentOptionValues = optionValuesContainer.querySelectorAll('.option-value-item').length;
+
+                // 10개 이상이면 추가 막기 (valueData가 있는 경우는 기존 데이터 로드 시에도 호출되므로 제외)
+                if (currentOptionValues >= 10 && !valueData) {
+                    alert('옵션값은 최대 10개까지만 추가할 수 있습니다.');
+                    return;
+                }
+
+                const optionValueClone = document.importNode(optionValueTemplate.content, true);
+                const optionValueItem = optionValueClone.querySelector('.option-value-item');
+
+                // 삭제 버튼 이벤트
+                optionValueClone.querySelector('.remove-btn').addEventListener('click', function() {
+                    optionValueItem.remove();
+                    // 옵션값이 없을 경우 메시지 표시
+                    if (optionValuesContainer.querySelectorAll('.option-value-item').length === 0) {
+                        noValuesMessage.classList.remove('d-none');
+                    }
+                });
+
+                // 기존 옵션값 데이터가 있으면 설정
+                if (valueData) {
+                    optionValueClone.querySelector('.option-value-value').value = valueData.value;
+                }
+
+                optionValuesContainer.appendChild(optionValueClone);
+                noValuesMessage.classList.add('d-none');
+            }
+
+            // 옵션이 없을 때 메시지 표시 여부
+            function updateNoOptionsMessage() {
+                if (optionCount === 0) {
+                    noOptionsMessage.classList.remove('d-none');
+                } else {
+                    noOptionsMessage.classList.add('d-none');
+                }
+            }
+
+            // 폼 유효성 검사
+            function validateForm() {
+                const form = document.getElementById('productForm');
+
+                // Bootstrap 유효성 검사 적용
+                form.classList.add('was-validated');
+
+                // 기본 필드 유효성 검사
+                const name = document.getElementById('name').value.trim();
+                const price = document.getElementById('price').value;
+                const shippingFee = document.getElementById('shippingFee').value;
+                const stock = document.getElementById('stock').value;
+
+                if (!name || !price || !shippingFee || !stock) {
+                    return false;
+                }
+
+                // 옵션 유효성 검사
+                const optionItems = document.querySelectorAll('.option-item');
+                for (const optionItem of optionItems) {
+                    const optionName = optionItem.querySelector('.option-name').value.trim();
+                    const optionType = optionItem.querySelector('.option-type').value;
+
+                    if (!optionName || !optionType) {
+                        return false;
+                    }
+
+                    // 선택형 옵션인 경우 옵션값 검사
+                    if (optionType === 'SELECT') {
+                        const optionValueItems = optionItem.querySelectorAll('.option-value-item');
+                        if (optionValueItems.length === 0) {
+                            alert('선택형 옵션에는 최소 하나 이상의 옵션값이 필요합니다.');
+                            return false;
+                        }
+
+                        for (const valueItem of optionValueItems) {
+                            const valueName = valueItem.querySelector('.option-value-value').value.trim();
+                            if (!valueName) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+                return true;
+            }
+
+            // 폼 제출 처리
+            function submitForm() {
+                // 데이터 구성
+                const productData = {
+                    name: document.getElementById('name').value.trim(),
+                    description: document.getElementById('description').value.trim(),
+                    price: parseInt(document.getElementById('price').value),
+                    shippingFee: parseInt(document.getElementById('shippingFee').value),
+                    stock: parseInt(document.getElementById('stock').value),
+                    options: []
+                };
+
+                // 옵션 데이터 수집
+                const optionItems = document.querySelectorAll('.option-item');
+                optionItems.forEach(optionItem => {
+                    const optionName = optionItem.querySelector('.option-name').value.trim();
+                    const optionType = optionItem.querySelector('.option-type').value;
+                    const additionalPrice = parseInt(optionItem.querySelector('.option-additional-price')?.value || 0);
+
+                    const optionData = {
+                        name: optionName,
+                        optionType: optionType,
+                        additionalPrice: additionalPrice,
+                        optionValues: []
+                    };
+
+                    // 선택형 옵션인 경우 옵션값 수집
+                    if (optionType === 'SELECT') {
+                        const optionValueItems = optionItem.querySelectorAll('.option-value-item');
+                        optionValueItems.forEach(valueItem => {
+                            optionData.optionValues.push({
+                                value: valueItem.querySelector('.option-value-value').value.trim()
+                            });
+                        });
+                    }
+
+                    productData.options.push(optionData);
+                });
+
+                // API 호출
+                fetch(`/api/products/${productId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+                    },
+                    body: JSON.stringify(productData)
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        } else {
+                            return response.json().then(data => {
+                                throw new Error(data.message || '수정 중 오류가 발생했습니다.');
+                            });
+                        }
+                    })
+                    .then(data => {
+                        alert('상품이 수정되었습니다.');
+                        window.location.href = `/api/view/products/${productId}`;
+                    })
+                    .catch(error => {
+                        alert('상품 수정 실패: ' + error.message);
+                    });
+            }
+        });
+    </script>
+</div>
+</body>
+</html>

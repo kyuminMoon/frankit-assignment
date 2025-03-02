@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/default}">
+<head>
+    <title>사용자 목록</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between mb-3">
+            <h2>사용자 목록</h2>
+            <a th:href="@{/view/users/new}" class="btn btn-primary" id="createUser">사용자 등록</a>
+        </div>
+
+        <!-- 사용자 목록 테이블 -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>이메일</th>
+                            <th>이름</th>
+                            <th>역할</th>
+                            <th>가입일</th>
+                            <th>관리</th>
+                        </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                        <!-- 사용자 데이터는 JavaScript로 동적으로 로드됩니다 -->
+                        <tr>
+                            <td colspan="6" class="text-center">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 사용자 템플릿 -->
+    <template id="userRowTemplate">
+        <tr>
+            <td class="user-id"></td>
+            <td class="user-email"></td>
+            <td class="user-name"></td>
+            <td>
+                <span class="badge user-role"></span>
+            </td>
+            <td class="user-created-at"></td>
+        </tr>
+    </template>
+
+    <!-- 사용자 목록 스크립트 -->
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            const accessToken = localStorage.getItem('accessToken');
+            const createUser = document.getElementById('createUser');
+
+            if (!accessToken) {
+                // 로그인 안 되어 있으면 "내 계정"을 숨기고 "로그인" 버튼 표시
+                createUser.classList.add('d-none');
+            }
+
+
+            loadUsers();
+
+            function loadUsers() {
+                fetch('/api/admin/users', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+                    }
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        } else if (response.status === 403) {
+                            throw new Error('관리자 권한이 필요합니다.');
+                        } else {
+                            throw new Error('사용자 목록을 불러오는데 실패했습니다.');
+                        }
+                    })
+                    .then(users => {
+                        renderUsers(users);
+                    })
+                    .catch(error => {
+                        const usersTableBody = document.getElementById('usersTableBody');
+                        usersTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center text-danger">
+                                <i class="fas fa-exclamation-circle me-2"></i> ${error.message}
+                            </td>
+                        </tr>
+                    `;
+                    });
+            }
+
+            function renderUsers(users) {
+                const usersTableBody = document.getElementById('usersTableBody');
+                const template = document.getElementById('userRowTemplate');
+
+                // 테이블 초기화
+                usersTableBody.innerHTML = '';
+
+                if (users.length === 0) {
+                    usersTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center">등록된 사용자가 없습니다.</td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                // 사용자 목록 렌더링
+                users.forEach(user => {
+                    const clone = document.importNode(template.content, true);
+
+                    clone.querySelector('.user-id').textContent = user.id;
+                    clone.querySelector('.user-email').textContent = user.email;
+                    clone.querySelector('.user-name').textContent = user.name;
+
+                    // 역할에 따른 배지 색상 설정
+                    const roleBadge = clone.querySelector('.user-role');
+                    roleBadge.textContent = user.role;
+
+                    if (user.role === 'ADMIN') {
+                        roleBadge.classList.add('bg-danger');
+                    } else if (user.role === 'USER') {
+                        roleBadge.classList.add('bg-primary');
+                    } else {
+                        roleBadge.classList.add('bg-secondary');
+                    }
+
+                    // 가입일 포맷팅
+                    const createdAt = new Date(user.createdAt);
+                    clone.querySelector('.user-created-at').textContent =
+                        createdAt.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+
+                    // 버튼 이벤트 및 링크 설정
+                    usersTableBody.appendChild(clone);
+                });
+            }
+
+            function deleteUser(userId) {
+                fetch(`/api/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+                    }
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('사용자가 삭제되었습니다.');
+                            loadUsers(); // 목록 새로고침
+                        } else {
+                            return response.json().then(data => {
+                                throw new Error(data.message || '사용자 삭제에 실패했습니다.');
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        alert('오류: ' + error.message);
+                    });
+            }
+        });
+    </script>
+</div>
+</body>
+</html>

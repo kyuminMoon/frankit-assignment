@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/default}">
+<head>
+    <title>사용자 상세</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between mb-3">
+            <h2>사용자 상세</h2>
+            <div>
+                <a th:href="@{/view/users}" class="btn btn-secondary">목록으로</a>
+            </div>
+        </div>
+
+        <!-- 로딩 스피너 -->
+        <div id="loadingSpinner" class="text-center my-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">사용자 정보를 불러오는 중...</p>
+        </div>
+
+        <!-- 오류 메시지 -->
+        <div id="errorMessage" class="alert alert-danger d-none" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span id="errorText">사용자 정보를 불러오는데 실패했습니다.</span>
+        </div>
+
+        <!-- 사용자 정보 카드 -->
+        <div id="userInfoCard" class="card mb-4 d-none">
+            <div class="card-header">
+                <h5 class="mb-0">기본 정보</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-2">
+                    <div class="col-md-3 fw-bold">사용자 ID</div>
+                    <div class="col-md-9" id="userId"></div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-3 fw-bold">이메일</div>
+                    <div class="col-md-9" id="userEmail"></div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-3 fw-bold">이름</div>
+                    <div class="col-md-9" id="userName"></div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-3 fw-bold">역할</div>
+                    <div class="col-md-9">
+                        <span class="badge" id="userRole"></span>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-3 fw-bold">가입일</div>
+                    <div class="col-md-9" id="userCreatedAt"></div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-3 fw-bold">수정일</div>
+                    <div class="col-md-9" id="userUpdatedAt"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            const userId = window.location.pathname.split('/').pop();
+            const userInfoCard = document.getElementById('userInfoCard');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            const editUserBtn = document.getElementById('editUserBtn');
+            const deleteUserBtn = document.getElementById('deleteUserBtn');
+
+            // 페이지 로드 시 사용자 정보 가져오기
+            loadUserDetails(userId);
+
+            // 수정 버튼 링크 설정
+            editUserBtn.href = `/view/users/${userId}/edit`;
+
+            // 삭제 버튼 이벤트
+            deleteUserBtn.addEventListener('click', function() {
+                if (confirm('정말로 이 사용자를 삭제하시겠습니까?')) {
+                    deleteUser(userId);
+                }
+            });
+
+            function loadUserDetails(userId) {
+                fetch(`/api/users/${userId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+                    }
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        } else if (response.status === 403) {
+                            throw new Error('권한이 없습니다.');
+                        } else if (response.status === 404) {
+                            throw new Error('사용자를 찾을 수 없습니다.');
+                        } else {
+                            throw new Error('사용자 정보를 불러오는데 실패했습니다.');
+                        }
+                    })
+                    .then(user => {
+                        displayUserInfo(user);
+                    })
+                    .catch(error => {
+                        showError(error.message);
+                    });
+            }
+
+            function displayUserInfo(user) {
+                // 로딩 스피너 숨기기
+                loadingSpinner.classList.add('d-none');
+                // 사용자 정보 카드 표시
+                userInfoCard.classList.remove('d-none');
+
+                // 사용자 정보 채우기
+                document.getElementById('userId').textContent = user.id;
+                document.getElementById('userEmail').textContent = user.email;
+                document.getElementById('userName').textContent = user.name;
+
+                // 역할 설정
+                const roleBadge = document.getElementById('userRole');
+                roleBadge.textContent = user.role;
+
+                if (user.role === 'ADMIN') {
+                    roleBadge.classList.add('bg-danger');
+                } else if (user.role === 'USER') {
+                    roleBadge.classList.add('bg-primary');
+                } else {
+                    roleBadge.classList.add('bg-secondary');
+                }
+
+                // 날짜 포맷팅
+                const createdAt = new Date(user.createdAt);
+                const updatedAt = new Date(user.updatedAt);
+
+                document.getElementById('userCreatedAt').textContent = formatDateTime(createdAt);
+                document.getElementById('userUpdatedAt').textContent = formatDateTime(updatedAt);
+            }
+
+            function formatDateTime(date) {
+                return date.toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+
+            function showError(message) {
+                // 로딩 스피너 숨기기
+                loadingSpinner.classList.add('d-none');
+
+                // 오류 메시지 표시
+                errorText.textContent = message;
+                errorMessage.classList.remove('d-none');
+            }
+
+            function deleteUser(userId) {
+                fetch(`/api/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
+                    }
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('사용자가 삭제되었습니다.');
+                            window.location.href = '/view/users';
+                        } else {
+                            return response.json().then(data => {
+                                throw new Error(data.message || '사용자 삭제에 실패했습니다.');
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        alert('오류: ' + error.message);
+                    });
+            }
+        });
+    </script>
+</div>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/default}">
+<head>
+    <title>홈</title>
+    <style>
+        .jumbotron {
+            background-color: #f8f9fa;
+            padding: 3rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        .feature-icon {
+            font-size: 3rem;
+            color: #0d6efd;
+            margin-bottom: 1rem;
+        }
+        .card {
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .stats-card {
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        .stats-value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container mt-4">
+        <!-- 헤더 섹션 -->
+        <div class="jumbotron text-center">
+            <h1 class="display-4">Frankit 상품 관리 시스템</h1>
+            <p class="lead">
+                효율적이고 간편한 상품 관리 솔루션으로 비즈니스를 성장시키세요.
+            </p>
+            <hr class="my-4">
+            <p>
+                상품, 옵션, 재고를 한 번에 관리할 수 있는 통합 시스템을 지금 시작해보세요.
+            </p>
+            <a class="btn btn-primary btn-lg" th:href="@{/view/products}" role="button">
+                <i class="fas fa-box me-2"></i> 상품 관리 시작하기
+            </a>
+        </div>
+
+        <!-- 주요 기능 소개 -->
+        <h3 class="mb-4">주요 기능</h3>
+        <div class="row mb-5">
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                        <h4 class="card-title">상품 관리</h4>
+                        <p class="card-text">
+                            손쉽게 상품을 등록하고, 수정하고, 관리하세요. 다양한 옵션과 가격을 설정할 수 있습니다.
+                        </p>
+                        <a th:href="@{/view/products}" class="btn btn-outline-primary mt-auto">상품 관리하기</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h4 class="card-title">사용자 조회</h4>
+                        <p class="card-text">
+                            모든 사용자를 조회합니다. 추후 사용자 관리 기능을 추가합니다.
+                        </p>
+                        <a th:href="@{/view/users}" class="btn btn-outline-primary mt-auto">사용자 조회하기</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

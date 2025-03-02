@@ -1,0 +1,89 @@
+/* 기본 스타일 */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* 헤더 스타일 */
+.navbar-brand {
+    font-weight: 600;
+}
+
+/* 카드 스타일 */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border-radius: 0.5rem;
+    border: none;
+}
+
+.card-header {
+    background-color: rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    border-top-left-radius: 0.5rem !important;
+    border-top-right-radius: 0.5rem !important;
+}
+
+/* 테이블 스타일 */
+.table {
+    vertical-align: middle;
+}
+
+.table th {
+    font-weight: 600;
+}
+
+/* 버튼 스타일 */
+.btn {
+    border-radius: 0.35rem;
+}
+
+/* 페이지네이션 스타일 */
+.pagination {
+    margin-bottom: 0;
+}
+
+/* 옵션 폼 스타일 */
+.option-item {
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-radius: 0.5rem;
+}
+
+/* 모달 스타일 */
+.modal-header {
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+}
+
+.modal-footer {
+    border-bottom-left-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+}
+
+/* Utility Classes */
+.text-small {
+    font-size: 0.875rem;
+}
+
+.fw-medium {
+    font-weight: 500;
+}
+
+.fw-semibold {
+    font-weight: 600;
+}
+
+/* 반응형 조정 */
+@media (max-width: 768px) {
+    .card-title {
+        font-size: 1.25rem;
+    }
+
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+}
