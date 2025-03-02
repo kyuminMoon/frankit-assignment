@@ -20,7 +20,7 @@ public class OptionValue extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "option_value", nullable = false)
     private String value;
 
     @ManyToOne(fetch = FetchType.LAZY)

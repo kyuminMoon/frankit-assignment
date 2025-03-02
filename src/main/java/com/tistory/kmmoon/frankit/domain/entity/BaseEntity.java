@@ -3,7 +3,7 @@ package com.tistory.kmmoon.frankit.domain.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
-import lombok.Getter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -17,7 +17,9 @@ import java.time.LocalDateTime;
  * - 생성자, 생성일시, 수정자, 수정일시 자동 관리
  */
 @Getter
+@Setter
 @MappedSuperclass
+@NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public abstract class BaseEntity {
 

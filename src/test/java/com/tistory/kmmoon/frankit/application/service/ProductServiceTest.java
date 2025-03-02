@@ -24,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -85,6 +86,8 @@ class ProductServiceTest {
                 .id(1L)
                 .value("빨강")
                 .build();
+        optionValue.setCreatedBy(1L);
+        optionValue.setCreatedAt(LocalDateTime.now());
 
         // 테스트용 옵션 엔티티 생성 - ArrayList 명시적 초기화
         Set<OptionValue> optionValues = new HashSet<>();
@@ -95,6 +98,9 @@ class ProductServiceTest {
                 .additionalPrice(new BigDecimal("1000"))
                 .optionValues(optionValues)
                 .build();
+        productOption.setCreatedBy(1L);
+        productOption.setCreatedAt(LocalDateTime.now());
+
         productOption.getOptionValues().add(optionValue);
         // 양방향 관계 설정
         optionValue.setProductOption(productOption);
@@ -110,6 +116,9 @@ class ProductServiceTest {
                 .stock(10L) // stock 필드 추가
                 .options(options)
                 .build();
+        product.setCreatedBy(1L);
+        product.setCreatedAt(LocalDateTime.now());
+
         product.getOptions().add(productOption);
         // 양방향 관계 설정
         productOption.setProduct(product);
@@ -170,7 +179,7 @@ class ProductServiceTest {
     @DisplayName("상품 상세 조회 성공 테스트")
     void getProductById_Success() {
         // given
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(productRepository.findByIdWithOptionsAndValues(1L)).thenReturn(Optional.of(product));
 
         // when
         ProductDto.Response response = productService.getProductById(1L);
@@ -180,27 +189,27 @@ class ProductServiceTest {
         assertEquals(product.getId(), response.getId());
         assertEquals(product.getName(), response.getName());
         assertEquals(product.getOptions().size(), response.getOptions().size());
-        verify(productRepository, times(1)).findById(1L);
+        verify(productRepository, times(1)).findByIdWithOptionsAndValues(1L);
     }
 
     @Test
     @DisplayName("상품 상세 조회 실패 테스트 - 상품 없음")
     void getProductById_Fail_NotFound() {
         // given
-        when(productRepository.findById(99L)).thenReturn(Optional.empty());
+        when(productRepository.findByIdWithOptionsAndValues(99L)).thenReturn(Optional.empty());
 
         // when & then
         assertThrows(CustomExceptions.ResourceNotFoundException.class, () -> {
             productService.getProductById(99L);
         });
-        verify(productRepository, times(1)).findById(99L);
+        verify(productRepository, times(1)).findByIdWithOptionsAndValues(99L);
     }
 
     @Test
     @DisplayName("상품 수정 성공 테스트")
     void updateProduct_Success() {
         // given
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(productRepository.findByIdWithOptionsAndValues(1L)).thenReturn(Optional.of(product));
         when(productRepository.save(any(Product.class))).thenReturn(product);
 
         ProductDto.Request updateRequest = ProductDto.Request.builder()
@@ -217,7 +226,7 @@ class ProductServiceTest {
         // then
         assertNotNull(response);
         assertEquals(product.getId(), response.getId());
-        verify(productRepository, times(1)).findById(1L);
+        verify(productRepository, times(1)).findByIdWithOptionsAndValues(1L);
         verify(productRepository, times(1)).save(any(Product.class));
     }
 
@@ -225,13 +234,13 @@ class ProductServiceTest {
     @DisplayName("상품 수정 실패 테스트 - 상품 없음")
     void updateProduct_Fail_NotFound() {
         // given
-        when(productRepository.findById(99L)).thenReturn(Optional.empty());
+        when(productRepository.findByIdWithOptionsAndValues(99L)).thenReturn(Optional.empty());
 
         // when & then
         assertThrows(CustomExceptions.ResourceNotFoundException.class, () -> {
             productService.updateProduct(99L, productRequest, user);
         });
-        verify(productRepository, times(1)).findById(99L);
+        verify(productRepository, times(1)).findByIdWithOptionsAndValues(99L);
         verify(productRepository, never()).save(any(Product.class));
     }
 
@@ -239,7 +248,7 @@ class ProductServiceTest {
     @DisplayName("상품 삭제 성공 테스트")
     void deleteProduct_Success() {
         // given
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(productRepository.findByIdWithOptionsAndValues(1L)).thenReturn(Optional.of(product));
         doNothing().when(productRepository).delete(any(Product.class));
 
         // DistributedLockTemplate mock 설정
@@ -260,7 +269,7 @@ class ProductServiceTest {
     @DisplayName("상품 삭제 실패 테스트 - 상품 없음")
     void deleteProduct_Fail_NotFound() {
         // given
-        when(productRepository.findById(99L)).thenReturn(Optional.empty());
+        when(productRepository.findByIdWithOptionsAndValues(99L)).thenReturn(Optional.empty());
 
         // DistributedLockTemplate mock 설정
         doAnswer(invocation -> {
@@ -280,7 +289,7 @@ class ProductServiceTest {
     @DisplayName("상품 재고 업데이트 성공 테스트 - 재고 증가")
     void updateProductStock_Increase_Success() {
         // given
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(productRepository.findByIdWithOptionsAndValues(1L)).thenReturn(Optional.of(product));
         when(productRepository.save(any(Product.class))).thenReturn(product);
 
         // when
@@ -289,7 +298,7 @@ class ProductServiceTest {
         // then
         assertNotNull(response);
         assertEquals(15, product.getStock()); // 기존 10 + 5 = 15
-        verify(productRepository, times(1)).findById(1L);
+        verify(productRepository, times(1)).findByIdWithOptionsAndValues(1L);
         verify(productRepository, times(1)).save(any(Product.class));
     }
 
@@ -297,7 +306,7 @@ class ProductServiceTest {
     @DisplayName("상품 재고 업데이트 성공 테스트 - 재고 감소")
     void updateProductStock_Decrease_Success() {
         // given
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(productRepository.findByIdWithOptionsAndValues(1L)).thenReturn(Optional.of(product));
         when(productRepository.save(any(Product.class))).thenReturn(product);
 
         // when
@@ -306,7 +315,7 @@ class ProductServiceTest {
         // then
         assertNotNull(response);
         assertEquals(5, product.getStock()); // 기존 10 - 5 = 5
-        verify(productRepository, times(1)).findById(1L);
+        verify(productRepository, times(1)).findByIdWithOptionsAndValues(1L);
         verify(productRepository, times(1)).save(any(Product.class));
     }
 
@@ -314,13 +323,13 @@ class ProductServiceTest {
     @DisplayName("상품 재고 업데이트 실패 테스트 - 재고 부족")
     void updateProductStock_Fail_InsufficientStock() {
         // given
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(productRepository.findByIdWithOptionsAndValues(1L)).thenReturn(Optional.of(product));
 
         // when & then
         assertThrows(CustomExceptions.CustomException.class, () -> {
             productService.updateProductStock(1L, -15); // 기존 10 - 15 = -5 (오류)
         });
-        verify(productRepository, times(1)).findById(1L);
+        verify(productRepository, times(1)).findByIdWithOptionsAndValues(1L);
         verify(productRepository, never()).save(any(Product.class));
     }
 
@@ -328,13 +337,13 @@ class ProductServiceTest {
     @DisplayName("상품 재고 업데이트 실패 테스트 - 상품 없음")
     void updateProductStock_Fail_NotFound() {
         // given
-        when(productRepository.findById(99L)).thenReturn(Optional.empty());
+        when(productRepository.findByIdWithOptionsAndValues(99L)).thenReturn(Optional.empty());
 
         // when & then
         assertThrows(CustomExceptions.ResourceNotFoundException.class, () -> {
             productService.updateProductStock(99L, 5);
         });
-        verify(productRepository, times(1)).findById(99L);
+        verify(productRepository, times(1)).findByIdWithOptionsAndValues(99L);
         verify(productRepository, never()).save(any(Product.class));
     }
 }

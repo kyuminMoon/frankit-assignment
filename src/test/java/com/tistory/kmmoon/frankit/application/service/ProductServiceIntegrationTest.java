@@ -9,9 +9,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -51,7 +53,9 @@ public class ProductServiceIntegrationTest {
                 .stock((long) INITIAL_STOCK)
                 .options(new HashSet<>())
                 .build();
-        
+        testProduct.setCreatedBy(1L);
+        testProduct.setCreatedAt(LocalDateTime.now());
+
         testProduct = productRepository.save(testProduct);
     }
     
