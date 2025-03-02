@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true">
+    <!-- 속성 정의 -->
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [traceId=%X{traceId}] %-5level %logger{36} - %msg%n"/>
+    <property name="LOG_FILE" value="./logs/product-management"/>
+    <property name="MAX_HISTORY" value="30"/>
+    <property name="MAX_FILE_SIZE" value="100MB"/>
+
+    <!-- 콘솔 출력 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 애플리케이션 로그 파일 출력 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE}.log</file>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_FILE}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>${MAX_FILE_SIZE}</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>${MAX_HISTORY}</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!-- 에러 로그 파일 별도 출력 -->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE}-error.log</file>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_FILE}-error.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>${MAX_FILE_SIZE}</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>${MAX_HISTORY}</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!-- 비동기 로깅 처리 -->
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE"/>
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+    </appender>
+
+    <!-- 프로파일별 로깅 레벨 설정 -->
+    <springProfile name="local,dev">
+        <logger name="com.tistory.kmmoon" level="DEBUG"/>
+        <logger name="org.springframework" level="INFO"/>
+        <logger name="org.hibernate.SQL" level="DEBUG"/>
+        <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE"/>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ASYNC_FILE"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="test">
+        <logger name="com.tistory.kmmoon" level="DEBUG"/>
+        <logger name="org.springframework" level="INFO"/>
+        <logger name="org.hibernate.SQL" level="DEBUG"/>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <logger name="com.tistory.kmmoon" level="INFO"/>
+        <logger name="org.springframework" level="WARN"/>
+        <logger name="org.hibernate" level="WARN"/>
+        <root level="INFO">
+            <appender-ref ref="ASYNC_FILE"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </root>
+    </springProfile>
+</configuration>
