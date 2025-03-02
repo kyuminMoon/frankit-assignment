@@ -24,6 +24,11 @@ public class MDCLoggingFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        if (request == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         try {
             setupMDC(request, response);
             filterChain.doFilter(request, response);
@@ -38,7 +43,7 @@ public class MDCLoggingFilter extends OncePerRequestFilter {
         if (traceId == null || traceId.isEmpty()) {
             traceId = generateTraceId();
         }
-        
+
         MDC.put(TRACE_ID, traceId);
         response.setHeader(REQUEST_ID_HEADER, traceId);
     }
