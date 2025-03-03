@@ -13,9 +13,10 @@ import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
-    
-    Page<Product> findAll(Pageable pageable);
 
+    /**
+     * N+1일 발생하지 않도록 FetchJoin 사용
+     */
     @Query("SELECT p FROM Product p LEFT JOIN FETCH p.options o LEFT JOIN FETCH o.optionValues WHERE p.id = :id")
     Optional<Product> findByIdWithOptionsAndValues(@Param("id") Long id);
 
