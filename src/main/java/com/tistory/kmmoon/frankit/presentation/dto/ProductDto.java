@@ -6,10 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,8 +16,10 @@ import java.util.stream.Collectors;
 
 public class ProductDto {
 
-    @Data
+    @Getter
     @Builder
+    @ToString
+    @EqualsAndHashCode
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Request {
@@ -57,8 +56,10 @@ public class ProductDto {
         }
     }
 
-    @Data
+    @Getter
     @Builder
+    @ToString
+    @EqualsAndHashCode
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Response {
@@ -90,8 +91,10 @@ public class ProductDto {
         }
     }
 
-    @Data
+    @Getter
     @Builder
+    @ToString
+    @EqualsAndHashCode
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ListResponse {

@@ -179,6 +179,11 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * USER Role -> ADMIN Role 변경
+     *
+     * @return ResponseEntity<UserResponse>
+     */
     @PutMapping("/add-role")
     @Operation(summary = "USER에게 ADMIN Role 추가 API", description = "특정 사용자의 역할을 변경합니다. (간편 테스트용 API)")
     @ApiResponses(value = {

@@ -4,10 +4,7 @@ import com.tistory.kmmoon.frankit.domain.entity.ProductOption;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -17,8 +14,10 @@ import java.util.stream.Collectors;
 
 public class ProductOptionDto {
 
-    @Data
+    @Getter
     @Builder
+    @ToString
+    @EqualsAndHashCode
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Request {
@@ -44,8 +43,10 @@ public class ProductOptionDto {
         }
     }
 
-    @Data
+    @Getter
     @Builder
+    @ToString
+    @EqualsAndHashCode
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Response {

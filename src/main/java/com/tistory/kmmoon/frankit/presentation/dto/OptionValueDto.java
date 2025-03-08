@@ -2,17 +2,16 @@ package com.tistory.kmmoon.frankit.presentation.dto;
 
 import com.tistory.kmmoon.frankit.domain.entity.OptionValue;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 public class OptionValueDto {
 
-    @Data
+    @Getter
     @Builder
+    @ToString
+    @EqualsAndHashCode
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Request {
@@ -26,8 +25,10 @@ public class OptionValueDto {
         }
     }
 
-    @Data
+    @Getter
     @Builder
+    @ToString
+    @EqualsAndHashCode
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Response {

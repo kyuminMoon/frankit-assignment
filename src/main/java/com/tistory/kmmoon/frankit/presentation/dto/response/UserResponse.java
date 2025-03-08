@@ -2,15 +2,14 @@ package com.tistory.kmmoon.frankit.presentation.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tistory.kmmoon.frankit.domain.entity.User;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
 @Builder
+@ToString
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserResponse {
