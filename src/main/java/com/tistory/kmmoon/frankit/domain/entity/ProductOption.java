@@ -9,11 +9,11 @@ import java.util.*;
 
 @Getter
 @Setter
-@ToString
-@RequiredArgsConstructor
 @Entity
 @Builder
+@ToString
 @AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "product_options")
 public class ProductOption extends BaseEntity {
 

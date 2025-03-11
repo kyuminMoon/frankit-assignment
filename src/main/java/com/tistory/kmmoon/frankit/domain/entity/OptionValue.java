@@ -8,11 +8,11 @@ import java.util.Objects;
 
 @Getter
 @Setter
-@ToString
-@RequiredArgsConstructor
 @Entity
 @Builder
+@ToString
 @AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "option_values")
 public class OptionValue extends BaseEntity {
 

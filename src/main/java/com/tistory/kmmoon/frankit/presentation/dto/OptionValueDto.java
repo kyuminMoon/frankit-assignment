@@ -12,7 +12,7 @@ public class OptionValueDto {
     @Builder
     @ToString
     @EqualsAndHashCode
-    @NoArgsConstructor
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     @AllArgsConstructor
     public static class Request {
         @NotBlank(message = "옵션 값은 필수 입력 항목입니다.")
@@ -29,8 +29,8 @@ public class OptionValueDto {
     @Builder
     @ToString
     @EqualsAndHashCode
-    @NoArgsConstructor
     @AllArgsConstructor
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class Response {
         private Long id;
         private String value;

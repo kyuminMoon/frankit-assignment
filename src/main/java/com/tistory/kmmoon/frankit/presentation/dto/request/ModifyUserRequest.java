@@ -7,8 +7,8 @@ import lombok.*;
 @Builder
 @ToString
 @EqualsAndHashCode
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ModifyUserRequest {
     @Size(min = 8, max = 20, message = "비밀번호는 8자 이상 20자 이하로 입력해주세요.")
     private String beforePassword;

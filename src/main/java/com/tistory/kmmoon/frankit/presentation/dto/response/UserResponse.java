@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 @Builder
 @ToString
 @EqualsAndHashCode
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserResponse {
 
     private Long id;

@@ -10,8 +10,8 @@ import java.util.Map;
 @Builder
 @ToString
 @EqualsAndHashCode
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorResponse {
     private int status;

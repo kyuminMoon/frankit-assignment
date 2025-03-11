@@ -41,7 +41,7 @@ public class ProductViewController {
     @GetMapping("/new")
     public String getProductForm(Model model) {
         log.info("상품 등록 페이지 요청");
-        model.addAttribute("product", new ProductDto.Request());
+        model.addAttribute("product", null);
         return "product/form";
     }
 

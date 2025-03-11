@@ -18,8 +18,8 @@ public class ProductOptionDto {
     @Builder
     @ToString
     @EqualsAndHashCode
-    @NoArgsConstructor
     @AllArgsConstructor
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class Request {
         @NotBlank(message = "옵션명은 필수 입력 항목입니다.")
         private String name;
@@ -47,8 +47,8 @@ public class ProductOptionDto {
     @Builder
     @ToString
     @EqualsAndHashCode
-    @NoArgsConstructor
     @AllArgsConstructor
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class Response {
         private Long id;
         private String name;

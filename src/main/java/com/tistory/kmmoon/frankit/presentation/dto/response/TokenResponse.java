@@ -6,8 +6,8 @@ import lombok.*;
 @Builder
 @ToString
 @EqualsAndHashCode
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TokenResponse {
     private String accessToken;
     private String refreshToken;

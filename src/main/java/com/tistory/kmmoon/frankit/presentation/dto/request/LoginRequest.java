@@ -8,8 +8,8 @@ import lombok.*;
 @Builder
 @ToString
 @EqualsAndHashCode
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class LoginRequest {
 
     @NotBlank(message = "이메일은 필수 입력 항목입니다.")
