@@ -1,4 +1,5 @@
 spring.application.name: frankit-assignment
+
 # 서버 설정
 server:
   port: 8080
@@ -13,7 +14,9 @@ server:
     min-response-size: 1024
 
 spring:
-
+  threads:
+    virtual:
+      enabled: true
   # 프로필 설정
   profiles:
     active: local
